@@ -24,7 +24,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={inter.className}>
+      <body className={geistSans.className}>
   {/* Add this provider for dark mode */}
   <div className="min-h-screen transition-colors duration-200">
     {children}
