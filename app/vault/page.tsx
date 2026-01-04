@@ -12,13 +12,13 @@ export default function VaultPage() {
             <div className="mt-4 space-y-3">
               <div>
                 <div className="text-green-300">USERNAME:</div>
-                <input className="mt-1 w-full bg-black p-2 border border-green-900" />
+                <input className="mt-1 w-full bg-black p-2 border border-green-900 text-green-400" />
               </div>
               <div>
                 <div className="text-green-300">PASSWORD:</div>
-                <input type="password" className="mt-1 w-full bg-black p-2 border border-green-900" />
+                <input type="password" className="mt-1 w-full bg-black p-2 border border-green-900 text-green-400" />
               </div>
-              <button className="border border-green-700 bg-green-900 px-6 py-2 text-green-300">
+              <button className="border border-green-700 bg-green-900 px-6 py-2 text-green-300 hover:bg-green-800">
                 LOGIN
               </button>
             </div>
