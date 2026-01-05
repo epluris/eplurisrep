@@ -2,8 +2,8 @@ import SearchBox from "./components/SearchBox";
 
 export default function Home() {
   return (
-    <div className="scanlines min-h-screen bg-gradient-to-b from-black to-gray-900">
-      {/* Hero Section with Clear Mission */}
+    <div className="min-h-screen bg-gradient-to-b from-black to-gray-900">
+      {/* Hero Section */}
       <main className="container mx-auto px-4 py-8">
         <div className="mb-12 rounded-xl border border-green-800/50 bg-gradient-to-r from-black to-gray-900/50 p-8 glow">
           <div className="max-w-3xl">
