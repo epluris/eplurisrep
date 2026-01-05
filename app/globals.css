@@ -3,9 +3,11 @@
 @tailwind utilities;
 
 :root {
-  --dos-bg: #000000;
-  --dos-text: #00FF00;
-  --dos-border: #00AA00;
+  --dos-bg: #0a0a0a;
+  --dos-text: #00ff41;  /* Matrix-style green */
+  --dos-border: #008f11;
+  --dos-highlight: #00ff41;
+  --modern-accent: #3b82f6;  /* Blue for modern touches */
 }
 
 body {
@@ -16,17 +18,7 @@ body {
   padding: 0;
 }
 
-/* DOS-style blinking cursor */
-@keyframes blink {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0; }
-}
-
-.blink {
-  animation: blink 1s step-end infinite;
-}
-
-/* DOS scanlines effect */
+/* Modern scanlines with gradient */
 .scanlines {
   position: relative;
   overflow: hidden;
@@ -42,9 +34,51 @@ body {
   background: linear-gradient(
     to bottom,
     transparent 50%,
-    rgba(0, 255, 0, 0.03) 50%
+    rgba(0, 255, 65, 0.03) 50%
   );
   background-size: 100% 4px;
   pointer-events: none;
   z-index: 10;
+}
+
+/* Blinking cursor */
+.blink {
+  animation: blink 1s step-end infinite;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+/* Glow effect for modern elements */
+.glow {
+  box-shadow: 0 0 10px rgba(0, 255, 65, 0.3);
+}
+
+.glow-blue {
+  box-shadow: 0 0 15px rgba(59, 130, 246, 0.4);
+}
+
+/* Smooth transitions */
+.transition-all {
+  transition: all 0.3s ease;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #111;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #00ff41;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #3b82f6;
 }

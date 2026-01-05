@@ -1,116 +1,68 @@
 import Link from "next/link";
-import SearchBox from "./components/SearchBox";
+import SearchBox from "../components/SearchBox";  // FIXED PATH
+import SearchResults from "../components/SearchResults";
 
-export default function Home() {
+interface SearchPageProps {
+  searchParams: {
+    q?: string;
+  };
+}
+
+export default async function SearchPage({ searchParams }: SearchPageProps) {
+  const query = searchParams.q || '';
+  
   return (
     <div className="scanlines min-h-screen bg-black p-4 font-mono text-green-400">
-      {/* DOS Header */}
-      <div className="mb-8 border border-green-800 p-2">
-        <div className="flex items-center gap-2">
-          <span className="text-xl">C:\EPLURIS\</span>
+      <div className="border border-green-800 p-4">
+        <div className="mb-4">
+          <span className="text-green-300">C:\SEARCH\QUERY\</span>
           <span className="blink">_</span>
         </div>
-        <div className="mt-1 text-sm text-green-600">
-          E Pluris - U.S. Government Data Terminal [Version 1.0]
+        
+        <div className="mb-6">
+          <SearchBox />
         </div>
-      </div>
-
-      {/* Main Content */}
-      <div className="grid gap-6 md:grid-cols-3">
-        {/* Left Column - System Status */}
-        <div className="border border-green-900 p-4">
-          <div className="mb-4 border-b border-green-900 pb-2">
-            <span className="text-green-300">SYSTEM STATUS</span>
-          </div>
-          <div className="space-y-2 text-sm">
-            <div className="flex justify-between">
-              <span>DATA.GOV</span>
-              <span className="text-green-300">● ONLINE</span>
+        
+        {query && (
+          <div className="border-t border-green-900 pt-4">
+            <div className="text-green-600">
+              [SEARCH RESULTS FOR: &quot;{query}&quot;]
             </div>
-            <div className="flex justify-between">
-              <span>ARCHIVES.GOV</span>
-              <span className="text-green-300">● ONLINE</span>
-            </div>
-            <div className="flex justify-between">
-              <span>CONGRESS.GOV</span>
-              <span className="text-yellow-400">● STANDBY</span>
-            </div>
-            <div className="mt-4 pt-2 border-t border-green-900">
-              <span className="text-green-600">Last updated: 01-05-2024 14:30:17</span>
+            <div className="mt-4">
+              <SearchResults query={query} />
             </div>
           </div>
-        </div>
-
-        {/* Center Column - Main Interface */}
-        <div className="md:col-span-2 border border-green-800 p-4">
-          <div className="mb-6">
-            <div className="text-lg text-green-300">
-              WELCOME TO E PLURIS DATA TERMINAL
+        )}
+        
+        <div className="mt-8 border-t border-green-900 pt-4">
+          <div className="text-green-600">[SEARCH PARAMETERS]</div>
+          <div className="mt-2 grid grid-cols-2 gap-4 text-sm">
+            <div className="border border-green-900 p-2">
+              <div className="text-green-300">SOURCE</div>
+              <div className="mt-1 space-y-1">
+                <label className="flex items-center">
+                  <input type="checkbox" className="mr-2 accent-green-600" defaultChecked />
+                  DATA.GOV
+                </label>
+                <label className="flex items-center">
+                  <input type="checkbox" className="mr-2 accent-green-600" />
+                  ARCHIVES.GOV
+                </label>
+              </div>
             </div>
-            <div className="mt-2 text-green-600">
-              &gt; Non-partisan U.S. Government Data Portal
+            <div className="border border-green-900 p-2">
+              <div className="text-green-300">TYPE</div>
+              <div className="mt-1 space-y-1">
+                <label className="flex items-center">
+                  <input type="radio" name="type" className="mr-2 accent-green-600" defaultChecked />
+                  DATASETS
+                </label>
+                <label className="flex items-center">
+                  <input type="radio" name="type" className="mr-2 accent-green-600" />
+                  DOCUMENTS
+                </label>
+              </div>
             </div>
-          </div>
-
-          {/* Command Input */}
-          <div className="mb-6">
-            <div className="mb-2 flex items-center">
-              <span className="text-green-300">C:\SEARCH\</span>
-              <span className="blink ml-1">_</span>
-            </div>
-            <SearchBox />
-          </div>
-
-          {/* Quick Commands */}
-          <div className="grid grid-cols-2 gap-4">
-            <Link 
-              href="/search" 
-              className="border border-green-900 p-3 hover:bg-green-950"
-            >
-              <div className="text-green-300">[1] SEARCH</div>
-              <div className="mt-1 text-sm text-green-600">Query all databases</div>
-            </Link>
-            <Link 
-              href="/vault" 
-              className="border border-green-900 p-3 hover:bg-green-950"
-            >
-              <div className="text-green-300">[2] VAULT</div>
-              <div className="mt-1 text-sm text-green-600">Personal data storage</div>
-            </Link>
-            <Link 
-              href="/browse" 
-              className="border border-green-900 p-3 hover:bg-green-950"
-            >
-              <div className="text-green-300">[3] BROWSE</div>
-              <div className="mt-1 text-sm text-green-600">Explore by category</div>
-            </Link>
-            <Link 
-              href="/gov" 
-              className="border border-green-900 p-3 hover:bg-green-950"
-            >
-              <div className="text-green-300">[4] GOV STRUCT</div>
-              <div className="mt-1 text-sm text-green-600">Org chart visual</div>
-            </Link>
-          </div>
-        </div>
-      </div>
-
-      {/* Footer Status Bar */}
-      <div className="mt-8 border-t border-green-900 pt-4 text-sm">
-        <div className="flex justify-between">
-          <div>
-            <span className="text-green-600">USERS ONLINE:</span>
-            <span className="ml-2 text-green-300">001</span>
-          </div>
-          <div>
-            <span className="text-green-600">DOCUMENTS INDEXED:</span>
-            <span className="ml-2 text-green-300">376,697+</span>
-          </div>
-          <div>
-            <span className="text-green-600">PRESS</span>
-            <span className="mx-2 text-green-800">|</span>
-            <span className="text-green-300">F1</span>
-            <span className="text-green-600 ml-4">FOR HELP</span>
           </div>
         </div>
       </div>
