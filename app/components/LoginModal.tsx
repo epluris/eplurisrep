@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '@/lib/firebase/config';
-import { FaTimes, FaTag, FaSave } from 'react-icons/fa';
 
 interface LoginModalProps {
   isOpen: boolean;
@@ -16,52 +15,23 @@ export default function LoginModal({ isOpen, onClose, mode }: LoginModalProps) {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [debugInfo, setDebugInfo] = useState('');
 
   if (!isOpen) return null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    setDebugInfo('');
     setLoading(true);
 
-    console.log('Attempting:', mode, 'with email:', email);
-    
     try {
-      // Test if Firebase auth is available
-      console.log('Firebase auth object:', auth);
-      
-      if (!auth) {
-        throw new Error('Firebase auth not initialized');
-      }
-
       if (mode === 'login') {
-        console.log('Calling signInWithEmailAndPassword');
-        const result = await signInWithEmailAndPassword(auth, email, password);
-        console.log('Login successful:', result.user.email);
-        setDebugInfo('Login successful!');
+        await signInWithEmailAndPassword(auth, email, password);
       } else {
-        console.log('Calling createUserWithEmailAndPassword');
-        const result = await createUserWithEmailAndPassword(auth, email, password);
-        console.log('Registration successful:', result.user.email);
-        setDebugInfo('Registration successful!');
+        await createUserWithEmailAndPassword(auth, email, password);
       }
-      
-      // Close modal after success
-      setTimeout(() => {
-        onClose();
-        // Clear form
-        setEmail('');
-        setPassword('');
-        setDebugInfo('');
-      }, 1500);
-      
+      onClose();
     } catch (err: any) {
       console.error('Authentication error:', err);
-      setDebugInfo(`Error code: ${err.code}, Message: ${err.message}`);
-      
-      // User-friendly error messages
       switch (err.code) {
         case 'auth/email-already-in-use':
           setError('This email is already registered. Try logging in instead.');
@@ -137,14 +107,6 @@ export default function LoginModal({ isOpen, onClose, mode }: LoginModalProps) {
             />
           </div>
 
-          {/* Debug Info */}
-          {debugInfo && (
-            <div className="rounded border border-yellow-800 bg-yellow-950/50 p-3">
-              <p className="text-sm text-yellow-400">Debug: {debugInfo}</p>
-            </div>
-          )}
-
-          {/* Error Message */}
           {error && (
             <div className="rounded border border-red-800 bg-red-950/50 p-3">
               <p className="text-sm text-red-400">{error}</p>
@@ -168,7 +130,6 @@ export default function LoginModal({ isOpen, onClose, mode }: LoginModalProps) {
           </p>
         </form>
         
-        {/* Test Accounts Section */}
         <div className="mt-6 border-t border-green-900 pt-4">
           <p className="mb-2 text-xs text-green-800">For testing:</p>
           <div className="space-y-1 text-xs text-green-700">
