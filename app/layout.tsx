@@ -3,13 +3,7 @@ import { Inter } from "next/font/google";
 import { AuthProvider } from "./components/AuthProvider";
 import MenuBar from "./components/MenuBar";
 import "./globals.css";
-
-const inter = Inter({ subsets: ["latin"] });
-
-export const metadata: Metadata = {
-  title: "ePluris - U.S. Government Data Portal",
-  description: "Simplifying access to U.S. government data for every American citizen.",
-};
+import RecaptchaProvider from './components/RecaptchaProvider';
 
 export default function RootLayout({
   children,
@@ -18,13 +12,15 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="dark">
-      <body className={`${inter.className} antialiased`}>
-        <AuthProvider>
-          <div className="scanlines">
-            <MenuBar />
-            {children}
-          </div>
-        </AuthProvider>
+      <body>
+        <RecaptchaProvider>
+          <AuthProvider>
+            <div className="scanlines">
+              <MenuBar />
+              {children}
+            </div>
+          </AuthProvider>
+        </RecaptchaProvider>
       </body>
     </html>
   );

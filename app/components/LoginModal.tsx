@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '@/lib/firebase/config';
 
@@ -12,25 +13,53 @@ interface LoginModalProps {
 }
 
 export default function LoginModal({ isOpen, onClose, mode }: LoginModalProps) {
+  const { executeRecaptcha } = useGoogleReCaptcha();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [verificationSuccess, setVerificationSuccess] = useState(false);
+  const [verificationScore, setVerificationScore] = useState<number | null>(null);
 
   if (!isOpen) return null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!executeRecaptcha) {
+      setError('reCAPTCHA not loaded');
+      return;
+    }
+
     setError('');
     setLoading(true);
+    setVerificationSuccess(false);
+    setVerificationScore(null);
 
     try {
-      if (mode === 'login') {
-        await signInWithEmailAndPassword(auth, email, password);
+      const token = await executeRecaptcha('login');
+      
+      const verifyResponse = await fetch('/api/verify-recaptcha', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token }),
+      });
+
+      const { success, score } = await verifyResponse.json();
+
+      setVerificationSuccess(success);
+      setVerificationScore(score);
+      
+      if (!success || score < 0.5) {
+        setError('Security check failed. Please try again.');
       } else {
-        await createUserWithEmailAndPassword(auth, email, password);
+        if (mode === 'login') {
+          await signInWithEmailAndPassword(auth, email, password);
+        } else {
+          await createUserWithEmailAndPassword(auth, email, password);
+        }
+        onClose();
       }
-      onClose();
     } catch (err: any) {
       setError(err.message || 'Authentication failed');
     } finally {
@@ -89,6 +118,13 @@ export default function LoginModal({ isOpen, onClose, mode }: LoginModalProps) {
           {error && (
             <div className="rounded border border-red-800 bg-red-950/50 p-3">
               <p className="text-sm text-red-400">{error}</p>
+            </div>
+          )}
+
+          {verificationSuccess && verificationScore !== null && (
+            <div className="mt-2 text-xs text-green-600">
+              Security score: {(verificationScore * 100).toFixed(0)}% 
+              {verificationScore > 0.7 ? ' ✅ Good' : verificationScore > 0.3 ? ' ⚠️ Suspicious' : ' ❌ Blocked'}
             </div>
           )}
 
