@@ -8,6 +8,8 @@ import AddToVaultModal from '../components/AddToVaultModal';
 import { getVaultDocuments, deleteVaultDocument, getVaultStats, VaultDocument } from '@/lib/firebase/vaultService';
 import { FaPlus, FaSearch, FaFilter, FaChartBar, FaSync } from 'react-icons/fa';
 
+export const dynamic = 'force-dynamic';
+
 // Rest of your vault page code...
 export default function VaultPage() {
   const { user, loading: authLoading } = useAuth();
@@ -99,7 +101,7 @@ export default function VaultPage() {
       <div className="scanlines min-h-screen bg-black p-4 font-mono text-green-400">
         <div className="border border-green-800 p-4">
           <div className="mb-4">
-            <span className="text-green-300">C:\VAULT\LOADING\</span>
+            <span className="text-green-300">C:\\VAULT\\LOADING\\</span>
             <span className="blink">_</span>
           </div>
           <div className="text-center py-12">
@@ -115,7 +117,7 @@ export default function VaultPage() {
       <div className="scanlines min-h-screen bg-black p-4 font-mono text-green-400">
         <div className="border border-green-800 p-4">
           <div className="mb-4">
-            <span className="text-green-300">C:\VAULT\ACCESS\</span>
+            <span className="text-green-300">C:\\VAULT\\ACCESS\\</span>
             <span className="blink">_</span>
           </div>
           
