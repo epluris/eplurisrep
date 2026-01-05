@@ -1,40 +1,36 @@
 'use client';
 
 import { useState } from 'react';
-import { useAuth } from './AuthProvider';
-import { signOut } from 'firebase/auth';
-import { auth } from '@/lib/firebase/config';
-import { FaUser, FaSignOutAlt, FaCaretDown, FaBox } from 'react-icons/fa';
 import Link from 'next/link';
+import { FaUser, FaSignOutAlt, FaCaretDown } from 'react-icons/fa';
 
 export default function UserMenu() {
-  const { user, loading } = useAuth();
   const [showDropdown, setShowDropdown] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false); // Temporary - will connect to auth later
 
-  const handleLogout = async () => {
-    await signOut(auth);
+  const handleLogin = () => {
+    setIsLoggedIn(true);
     setShowDropdown(false);
   };
 
-  if (loading) {
-    return (
-      <div className="rounded-lg border border-green-800 px-4 py-2">
-        <div className="text-sm text-green-600">LOADING...</div>
-      </div>
-    );
-  }
+  const handleLogout = () => {
+    setIsLoggedIn(false);
+    setShowDropdown(false);
+  };
 
-  if (!user) {
+  if (!isLoggedIn) {
     return (
       <div className="flex gap-2">
         <Link
-          href="/login"
+          href="/vault"
+          onClick={handleLogin}
           className="rounded-lg border border-green-800 px-4 py-2 text-sm text-green-400 hover:bg-green-950/30"
         >
           LOGIN
         </Link>
         <Link
-          href="/register"
+          href="/vault"
+          onClick={handleLogin}
           className="rounded-lg bg-gradient-to-r from-green-700 to-green-800 px-4 py-2 text-sm text-green-300 hover:from-green-600 hover:to-green-700"
         >
           REGISTER
@@ -50,9 +46,7 @@ export default function UserMenu() {
         className="flex items-center gap-2 rounded-lg border border-green-800 bg-green-950/20 px-4 py-2 hover:bg-green-950/40"
       >
         <FaUser className="text-green-400" />
-        <span className="text-sm text-green-300">
-          {user.email?.split('@')[0] || 'USER'}
-        </span>
+        <span className="text-sm text-green-300">USER</span>
         <FaCaretDown className="text-green-600" />
       </button>
 
@@ -60,15 +54,8 @@ export default function UserMenu() {
         <div className="absolute right-0 top-full mt-2 w-48 rounded-lg border border-green-800 bg-black py-2">
           <div className="border-b border-green-900 px-4 py-2">
             <p className="text-xs text-green-600">Logged in as</p>
-            <p className="truncate text-sm text-green-400">{user.email}</p>
+            <p className="truncate text-sm text-green-400">user@example.com</p>
           </div>
-          <Link
-            href="/vault"
-            className="flex w-full items-center gap-2 px-4 py-2 text-sm text-green-400 hover:bg-green-950/30"
-          >
-            <FaBox />
-            My Vault
-          </Link>
           <button
             onClick={handleLogout}
             className="flex w-full items-center gap-2 px-4 py-2 text-sm text-red-400 hover:bg-green-950/30"
