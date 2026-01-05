@@ -24,7 +24,7 @@ export default function MenuBar() {
     <header className="sticky top-0 z-50 border-b border-green-800/50 bg-black/90 backdrop-blur-sm">
       <div className="container mx-auto px-4 py-3">
         <div className="flex items-center justify-between">
-          {/* Logo/Brand - Updated to ePluris */}
+          {/* Logo/Brand */}
           <div className="flex items-center gap-3">
             <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-green-500 to-blue-600 flex items-center justify-center">
               <span className="font-bold text-white">EP</span>
