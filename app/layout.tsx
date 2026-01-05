@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import { AuthProvider } from "@/components/AuthProvider";
+import { AuthProvider } from "@/app/components/AuthProvider";
+import MenuBar from "@/app/components/MenuBar";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "E Pluribus Unum - U.S. Government Data Portal",
+  title: "ePluris - U.S. Government Data Portal",
   description: "Simplifying access to U.S. government data for every American citizen.",
 };
 
@@ -19,6 +20,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${inter.className} antialiased`}>
         <AuthProvider>
+          <MenuBar />
           {children}
         </AuthProvider>
       </body>

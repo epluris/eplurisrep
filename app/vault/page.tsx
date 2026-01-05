@@ -1,10 +1,10 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useAuth } from '@/components/AuthProvider';
-import LoginModal from '@/components/LoginModal';
-import VaultDocumentCard from '@/components/VaultDocumentCard';
-import AddToVaultModal from '@/components/AddToVaultModal';
+import { useAuth } from '@/app/components/AuthProvider';
+import LoginModal from '@/app/components/LoginModal';
+import VaultDocumentCard from '@/app/components/VaultDocumentCard';
+import AddToVaultModal from '@/app/components/AddToVaultModal';
 import { getVaultDocuments, deleteVaultDocument, getVaultStats, VaultDocument } from '@/lib/firebase/vaultService';
 import { FaPlus, FaSearch, FaFilter, FaChartBar, FaSync } from 'react-icons/fa';
 
