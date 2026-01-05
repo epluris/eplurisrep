@@ -1,40 +1,29 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
 import { FaUser, FaSignOutAlt, FaCaretDown } from 'react-icons/fa';
 
 export default function UserMenu() {
   const [showDropdown, setShowDropdown] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false); // Temporary - will connect to auth later
-
-  const handleLogin = () => {
-    setIsLoggedIn(true);
-    setShowDropdown(false);
-  };
-
-  const handleLogout = () => {
-    setIsLoggedIn(false);
-    setShowDropdown(false);
-  };
+  
+  // Temporary - we'll connect to real auth later
+  const isLoggedIn = false;
 
   if (!isLoggedIn) {
     return (
       <div className="flex gap-2">
-        <Link
-          href="/vault"
-          onClick={handleLogin}
+        <button
+          onClick={() => window.location.href = '/vault'}
           className="rounded-lg border border-green-800 px-4 py-2 text-sm text-green-400 hover:bg-green-950/30"
         >
           LOGIN
-        </Link>
-        <Link
-          href="/vault"
-          onClick={handleLogin}
+        </button>
+        <button
+          onClick={() => window.location.href = '/vault'}
           className="rounded-lg bg-gradient-to-r from-green-700 to-green-800 px-4 py-2 text-sm text-green-300 hover:from-green-600 hover:to-green-700"
         >
           REGISTER
-        </Link>
+        </button>
       </div>
     );
   }
@@ -57,7 +46,7 @@ export default function UserMenu() {
             <p className="truncate text-sm text-green-400">user@example.com</p>
           </div>
           <button
-            onClick={handleLogout}
+            onClick={() => window.location.href = '/'}
             className="flex w-full items-center gap-2 px-4 py-2 text-sm text-red-400 hover:bg-green-950/30"
           >
             <FaSignOutAlt />
