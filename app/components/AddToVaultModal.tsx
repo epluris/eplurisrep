@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { saveToVault } from '@/lib/firebase/vaultService';
 import { useAuth } from './AuthProvider';
-import { FaTimes, FaTag, FaSave, FaExternalLink } from 'react-icons/fa';
+import { FaTimes, FaTag, FaSave, FaExternalLinkAlt } from 'react-icons/fa';
 
 interface AddToVaultModalProps {
   isOpen: boolean;
@@ -195,7 +195,7 @@ export default function AddToVaultModal({ isOpen, onClose, documentData }: AddTo
             <div className="grid gap-4 md:grid-cols-2">
               <div>
                 <label className="mb-2 block text-sm font-medium text-green-300">
-                  <FaExternalLink className="inline mr-2" />
+                  <FaExternalLinkAlt className="inline mr-2" />
                   Source URL *
                 </label>
                 <input

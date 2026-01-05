@@ -1,5 +1,4 @@
 import SearchBox from "./components/SearchBox";
-import { AuthProvider } from "@/components/AuthProvider";
 
 export default function Home() {
   return (

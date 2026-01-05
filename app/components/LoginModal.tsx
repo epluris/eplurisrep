@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '@/lib/firebase/config';
 
+// Define the props interface
 interface LoginModalProps {
   isOpen: boolean;
   onClose: () => void;
