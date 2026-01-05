@@ -1,4 +1,5 @@
 import Link from "next/link";
+import SearchBox from "./components/SearchBox";
 
 export default function Home() {
   return (
@@ -57,19 +58,7 @@ export default function Home() {
               <span className="text-green-300">C:\SEARCH\</span>
               <span className="blink ml-1">_</span>
             </div>
-            <div className="flex">
-              <input
-                type="text"
-                placeholder="ENTER SEARCH QUERY..."
-                className="flex-1 bg-black p-2 font-mono text-green-400 outline-none border border-green-900"
-              />
-              <button className="border border-green-700 bg-green-900 px-4 py-2 text-green-300 hover:bg-green-800">
-                EXECUTE
-              </button>
-            </div>
-            <div className="mt-2 text-sm text-green-600">
-              &gt; Try: &quot;FEDERAL BUDGET 2024&quot; or &quot;DECLASSIFIED 1990&quot;
-            </div>
+            <SearchBox />
           </div>
 
           {/* Quick Commands */}
