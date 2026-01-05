@@ -55,8 +55,11 @@ interface SearchResultsProps {
                 </div>
               </div>
               <div className="flex gap-2">
-                <button className="border border-green-700 bg-green-900 px-3 py-1 text-xs text-green-300 hover:bg-green-800">
-                  VIEW
+                <button
+                onClick={() => {/*testing*/}}
+                className="border border-blue-700 bg-blue-900 px-3 py-1 text-xs text blue-300 hpver:bg-blue-800"
+                >                
+                SAVE TO VAULT
                 </button>
                 <button className="border border-blue-700 bg-blue-900 px-3 py-1 text-xs text-blue-300 hover:bg-blue-800">
                   SAVE TO VAULT
