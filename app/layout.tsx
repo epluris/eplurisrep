@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import UserMenu from "./UserMenu";
+import UserMenu from "./components/UserMenu";
 import { 
   FaSearch, 
   FaDatabase, 

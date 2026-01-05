@@ -9,7 +9,7 @@
     "lint": "eslint"
   },
   "dependencies": {
-    "@dataconnect/generated": "file:src/dataconnect-generated",
+    "@dataconnect/generated": "file:src/dataconnect-generated/dataconnect-generated-1.0.0.tgz",
     "next": "16.1.1",
     "react": "19.2.3",
     "react-dom": "19.2.3",
