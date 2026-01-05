@@ -1,11 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '@/lib/firebase/config';
+import { FaTimes, FaTag, FaSave } from 'react-icons/fa';
 
-// Define the props interface
 interface LoginModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -13,55 +12,78 @@ interface LoginModalProps {
 }
 
 export default function LoginModal({ isOpen, onClose, mode }: LoginModalProps) {
-  const { executeRecaptcha } = useGoogleReCaptcha();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [verificationSuccess, setVerificationSuccess] = useState(false);
-  const [verificationScore, setVerificationScore] = useState<number | null>(null);
+  const [debugInfo, setDebugInfo] = useState('');
 
   if (!isOpen) return null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!executeRecaptcha) {
-      setError('reCAPTCHA not loaded');
-      return;
-    }
-
     setError('');
+    setDebugInfo('');
     setLoading(true);
-    setVerificationSuccess(false);
-    setVerificationScore(null);
 
+    console.log('Attempting:', mode, 'with email:', email);
+    
     try {
-      const token = await executeRecaptcha('login');
+      // Test if Firebase auth is available
+      console.log('Firebase auth object:', auth);
       
-      const verifyResponse = await fetch('/api/verify-recaptcha', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token }),
-      });
-
-      const { success, score } = await verifyResponse.json();
-
-      setVerificationSuccess(success);
-      setVerificationScore(score);
-      
-      if (!success || score < 0.5) {
-        setError('Security check failed. Please try again.');
-      } else {
-        if (mode === 'login') {
-          await signInWithEmailAndPassword(auth, email, password);
-        } else {
-          await createUserWithEmailAndPassword(auth, email, password);
-        }
-        onClose();
+      if (!auth) {
+        throw new Error('Firebase auth not initialized');
       }
+
+      if (mode === 'login') {
+        console.log('Calling signInWithEmailAndPassword');
+        const result = await signInWithEmailAndPassword(auth, email, password);
+        console.log('Login successful:', result.user.email);
+        setDebugInfo('Login successful!');
+      } else {
+        console.log('Calling createUserWithEmailAndPassword');
+        const result = await createUserWithEmailAndPassword(auth, email, password);
+        console.log('Registration successful:', result.user.email);
+        setDebugInfo('Registration successful!');
+      }
+      
+      // Close modal after success
+      setTimeout(() => {
+        onClose();
+        // Clear form
+        setEmail('');
+        setPassword('');
+        setDebugInfo('');
+      }, 1500);
+      
     } catch (err: any) {
-      setError(err.message || 'Authentication failed');
+      console.error('Authentication error:', err);
+      setDebugInfo(`Error code: ${err.code}, Message: ${err.message}`);
+      
+      // User-friendly error messages
+      switch (err.code) {
+        case 'auth/email-already-in-use':
+          setError('This email is already registered. Try logging in instead.');
+          break;
+        case 'auth/invalid-email':
+          setError('Invalid email address.');
+          break;
+        case 'auth/operation-not-allowed':
+          setError('Email/password accounts are not enabled. Check Firebase console.');
+          break;
+        case 'auth/weak-password':
+          setError('Password is too weak. Use at least 6 characters.');
+          break;
+        case 'auth/user-not-found':
+          setError('No account found with this email.');
+          break;
+        case 'auth/wrong-password':
+          setError('Incorrect password.');
+          break;
+        default:
+          setError(err.message || 'Authentication failed. Check console for details.');
+      }
     } finally {
       setLoading(false);
     }
@@ -97,7 +119,7 @@ export default function LoginModal({ isOpen, onClose, mode }: LoginModalProps) {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="w-full rounded border border-green-800 bg-black p-3 text-green-400 outline-none focus:border-green-600"
-              placeholder="user@example.com"
+              placeholder="test@example.com"
               required
             />
           </div>
@@ -115,16 +137,17 @@ export default function LoginModal({ isOpen, onClose, mode }: LoginModalProps) {
             />
           </div>
 
-          {error && (
-            <div className="rounded border border-red-800 bg-red-950/50 p-3">
-              <p className="text-sm text-red-400">{error}</p>
+          {/* Debug Info */}
+          {debugInfo && (
+            <div className="rounded border border-yellow-800 bg-yellow-950/50 p-3">
+              <p className="text-sm text-yellow-400">Debug: {debugInfo}</p>
             </div>
           )}
 
-          {verificationSuccess && verificationScore !== null && (
-            <div className="mt-2 text-xs text-green-600">
-              Security score: {(verificationScore * 100).toFixed(0)}% 
-              {verificationScore > 0.7 ? ' ✅ Good' : verificationScore > 0.3 ? ' ⚠️ Suspicious' : ' ❌ Blocked'}
+          {/* Error Message */}
+          {error && (
+            <div className="rounded border border-red-800 bg-red-950/50 p-3">
+              <p className="text-sm text-red-400">{error}</p>
             </div>
           )}
 
@@ -138,12 +161,21 @@ export default function LoginModal({ isOpen, onClose, mode }: LoginModalProps) {
 
           <p className="text-center text-sm text-green-600">
             {mode === 'login' ? (
-              <>New user? <button type="button" className="text-green-400 hover:underline">Register here</button></>
+              <>New user? <button type="button" onClick={() => {/* Switch to register mode */}} className="text-green-400 hover:underline">Register here</button></>
             ) : (
-              <>Already have an account? <button type="button" className="text-green-400 hover:underline">Login here</button></>
+              <>Already have an account? <button type="button" onClick={() => {/* Switch to login mode */}} className="text-green-400 hover:underline">Login here</button></>
             )}
           </p>
         </form>
+        
+        {/* Test Accounts Section */}
+        <div className="mt-6 border-t border-green-900 pt-4">
+          <p className="mb-2 text-xs text-green-800">For testing:</p>
+          <div className="space-y-1 text-xs text-green-700">
+            <div>Email: test@example.com</div>
+            <div>Password: password123</div>
+          </div>
+        </div>
       </div>
     </div>
   );
