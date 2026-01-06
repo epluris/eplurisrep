@@ -1,6 +1,7 @@
 // app/api/gov/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { govApiService } from '@/lib/gov-apis/govApiService';
+import { govApiEndpoints } from '@/lib/gov-apis/config';
 
 export async function GET(request: NextRequest) {
   try {
@@ -29,8 +30,8 @@ export async function GET(request: NextRequest) {
           );
         }
         
-        const categories = category ? category.split(',') : undefined;
-        result = await govApiService.searchAcrossApis(query, categories);
+        const categories = category ? category.split(',') : [];
+        result = await govApiService.search(query, categories);
         break;
 
       case 'endpoint':
@@ -42,10 +43,7 @@ export async function GET(request: NextRequest) {
         }
         
         const requestParams = params ? JSON.parse(params) : {};
-        result = await govApiService.makeRequest({
-          endpointName: endpoint,
-          params: requestParams,
-        });
+        result = await govApiService.getDataset(endpoint, requestParams);
         break;
 
       case 'datasets':

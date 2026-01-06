@@ -9,7 +9,8 @@ import {
   FaUserLock, 
   FaProjectDiagram, 
   FaInfoCircle,
-  FaHome 
+  FaHome,
+  FaBuilding
 } from "react-icons/fa";
 
 export default function MenuBar() {
@@ -45,6 +46,7 @@ export default function MenuBar() {
             <NavLink href="/" icon={<FaHome />} text="Home" active={isActive('/') && pathname === '/'} />
             <NavLink href="/search" icon={<FaSearch />} text="Search" active={isActive('/search')} />
             <NavLink href="/browse" icon={<FaDatabase />} text="Browse" active={isActive('/browse')} />
+            <NavLink href="/government" icon={<FaBuilding />} text="Government Data" active={isActive('/government')} />
             <NavLink href="/vault" icon={<FaUserLock />} text="My Vault" active={isActive('/vault')} />
             <NavLink href="/visualize" icon={<FaProjectDiagram />} text="Visualize" active={isActive('/visualize')} />
             <NavLink href="/mission" icon={<FaInfoCircle />} text="Mission" active={isActive('/mission')} />
