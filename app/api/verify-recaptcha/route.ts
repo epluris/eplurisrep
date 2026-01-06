@@ -1,37 +1,58 @@
-import { NextResponse } from 'next/server';
+// app/api/search/route.ts
+import { NextRequest, NextResponse } from 'next/server';
+import { searchService } from '@/lib/search/searchService';
+import { validateSearchConfig } from '@/lib/search/config';
 
-export async function POST(request: Request) {
+// Validate config on startup
+validateSearchConfig();
+
+export async function GET(request: NextRequest) {
   try {
-    const { token } = await request.json();
-    
-    const secretKey = process.env.RECAPTCHA_SECRET_KEY;
-    
-    if (!secretKey) {
+    const searchParams = request.nextUrl.searchParams;
+    const query = searchParams.get('q');
+    const engine = searchParams.get('engine') as any;
+    const numResults = parseInt(searchParams.get('num') || '10');
+    const allEngines = searchParams.get('all') === 'true';
+
+    if (!query) {
       return NextResponse.json(
-        { error: 'reCAPTCHA not configured' },
-        { status: 500 }
+        { error: 'Query parameter "q" is required' },
+        { status: 400 }
       );
     }
 
-    // Verify with Google
-    const response = await fetch(
-      `https://www.google.com/recaptcha/api/siteverify?secret=${secretKey}&response=${token}`,
-      { method: 'POST' }
-    );
-
-    const data = await response.json();
+    let results;
+    
+    if (allEngines) {
+      results = await searchService.searchAll({
+        query,
+        numResults,
+      });
+    } else {
+      results = await searchService.search({
+        query,
+        engine: engine || 'google',
+        numResults,
+      });
+    }
 
     return NextResponse.json({
-      success: data.success,
-      score: data.score,
-      action: data.action,
-      timestamp: data.challenge_ts,
-      hostname: data.hostname,
+      query,
+      engine: allEngines ? 'all' : engine,
+      count: results.length,
+      results,
+      timestamp: new Date().toISOString(),
     });
-  } catch (error) {
-    console.error('reCAPTCHA verification error:', error);
+
+  } catch (error: any) {
+    console.error('Search API error:', error);
+    
     return NextResponse.json(
-      { error: 'Verification failed' },
+      { 
+        error: 'Search failed', 
+        message: error.message,
+        details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+      },
       { status: 500 }
     );
   }
