@@ -3,8 +3,17 @@
 
 import { useState } from 'react';
 
+export interface SearchResult {
+    title: string;
+    description: string;
+    url: string;
+    source: string;
+    agency?: string;
+    date?: string;
+  }
+
 interface GovSearchBoxProps {
-  onSearchResults?: (results: any[]) => void;
+  onSearchResults?: (results: SearchResult[]) => void;
   onSearchError?: (error: string) => void;
 }
 
@@ -69,10 +78,11 @@ export default function GovSearchBox({ onSearchResults, onSearchError }: GovSear
         onSearchError(data.error);
       }
       
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Government search error:', error);
       if (onSearchError) {
-        onSearchError(error.message || 'Search failed');
+        const message = error instanceof Error ? error.message : 'Search failed';
+        onSearchError(message);
       }
     } finally {
       setLoading(false);

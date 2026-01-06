@@ -2,39 +2,50 @@
 
 import { useEffect, useState } from 'react';
 import { auth } from '@/lib/firebase/config';
-import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { createUserWithEmailAndPassword, User } from 'firebase/auth';
+
+// Custom hook to manage auth status
+const useAuthStatus = () => {
+  const [status, setStatus] = useState(() =>
+    auth ? 'Firebase auth loaded: YES' : 'Firebase auth loaded: NO'
+  );
+  return [status, setStatus] as const;
+};
 
 export default function TestFirebase() {
-  const [status, setStatus] = useState('Testing...');
-  const [user, setUser] = useState<any>(null);
+  const [status, setStatus] = useAuthStatus();
+  const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
-    console.log('Firebase auth object:', auth);
-    setStatus('Firebase auth loaded: ' + (auth ? 'YES' : 'NO'));
-    
-    // Test creating a user
     const testAuth = async () => {
       try {
         const testEmail = `test${Date.now()}@example.com`;
         const testPassword = 'password123';
-        
-        console.log('Testing with:', testEmail);
+
+        setStatus('Testing user creation...');
         const result = await createUserWithEmailAndPassword(auth, testEmail, testPassword);
-        console.log('Success! User:', result.user);
+        
         setUser(result.user);
-        setStatus('✅ Firebase auth WORKING! Created test user: ' + testEmail);
+        setStatus(`✅ Firebase auth WORKING! Created and cleaned up test user: ${testEmail}`);
         
         // Clean up - delete test user
         await result.user.delete();
-        console.log('Test user cleaned up');
-      } catch (error: any) {
+
+      } catch (error: unknown) {
         console.error('Firebase test failed:', error);
-        setStatus(`❌ Firebase error: ${error.code} - ${error.message}`);
+        let errorMessage = 'An unknown error occurred.';
+        if (error instanceof Error && 'code' in error) {
+            const firebaseError = error as { code: string, message: string };
+            errorMessage = `Firebase error: ${firebaseError.code} - ${firebaseError.message}`;
+        }
+        setStatus(`❌ ${errorMessage}`);
       }
     };
-    
-    testAuth();
-  }, []);
+
+    if (auth) {
+        testAuth();
+    }
+  }, [setStatus]);
 
   return (
     <div className="min-h-screen bg-black p-8 text-green-400">
@@ -46,7 +57,7 @@ export default function TestFirebase() {
       
       {user && (
         <div className="p-4 border border-green-700 rounded bg-green-950/30">
-          <div className="font-bold">Test User Created:</div>
+          <div className="font-bold">Test User Created (and then deleted):</div>
           <div>Email: {user.email}</div>
           <div>UID: {user.uid}</div>
         </div>

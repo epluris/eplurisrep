@@ -1,12 +1,19 @@
 
 // lib/search/config.ts
-export interface SearchProvider {
-  name: string;
-  fullName: string;
-  website: string;
-  supportsHistorical: boolean;
-  search: (query: string, options: { numResults: number }) => Promise<{ success: boolean; results: any[] }>;
-}
+export interface SearchResult {
+    title: string;
+    url: string;
+    description: string;
+    raw: unknown; 
+  }
+  
+  export interface SearchProvider {
+    name: string;
+    fullName: string;
+    website: string;
+    supportsHistorical: boolean;
+    search: (query: string, options: { numResults: number }) => Promise<{ success: boolean; results: SearchResult[] }>;
+  }
 
 import googleProvider from './providers/google';
 import bingProvider from './providers/bing';

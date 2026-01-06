@@ -1,7 +1,6 @@
-// app/api/gov/route.ts
+
 import { NextRequest, NextResponse } from 'next/server';
-import { govApiService } from '@/lib/gov-apis/govApiService';
-import { govApiEndpoints } from '@/lib/gov-apis/config';
+import { govApiService, govApiEndpoints } from '../../../lib/gov-apis';
 
 export async function GET(request: NextRequest) {
   try {
@@ -48,8 +47,10 @@ export async function GET(request: NextRequest) {
 
       case 'datasets':
         // List available datasets
-        result = {
+        return NextResponse.json({
           success: true,
+          action,
+          timestamp: new Date().toISOString(),
           data: govApiEndpoints.map(ep => ({
             name: ep.name,
             category: ep.category,
@@ -57,8 +58,7 @@ export async function GET(request: NextRequest) {
             requiresKey: ep.requiresKey,
             example: ep.example,
           })),
-        };
-        break;
+        });
 
       default:
         return NextResponse.json(
@@ -68,20 +68,20 @@ export async function GET(request: NextRequest) {
     }
 
     return NextResponse.json({
-      success: true,
       action,
       timestamp: new Date().toISOString(),
       ...result,
     });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Government API error:', error);
-    
+    const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+    const stack = process.env.NODE_ENV === 'development' && error instanceof Error ? error.stack : undefined;
     return NextResponse.json(
       {
         success: false,
-        error: error.message,
-        stack: process.env.NODE_ENV === 'development' ? error.stack : undefined,
+        error: errorMessage,
+        stack,
       },
       { status: 500 }
     );

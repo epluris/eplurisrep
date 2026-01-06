@@ -1,12 +1,14 @@
-// app/components/GovDatasetBrowser.tsx
+
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { govApiEndpoints } from '@/lib/gov-apis/config';
+import { GovApiEndpoint } from '@/lib/gov-apis/types';
 
+// ... (DatasetCard component remains the same)
 interface DatasetCardProps {
-  dataset: typeof govApiEndpoints[0];
-  onSelect: (dataset: typeof govApiEndpoints[0]) => void;
+  dataset: GovApiEndpoint;
+  onSelect: (dataset: GovApiEndpoint) => void;
 }
 
 function DatasetCard({ dataset, onSelect }: DatasetCardProps) {
@@ -18,12 +20,7 @@ function DatasetCard({ dataset, onSelect }: DatasetCardProps) {
       <div className="flex items-start justify-between">
         <div>
           <h3 className="font-semibold text-gray-900">{dataset.name}</h3>
-          <span className={`inline-block px-2 py-1 text-xs rounded-full ${
-            dataset.category === 'CDC Data' ? 'bg-indigo-100 text-indigo-800' :
-            dataset.category === 'Congress' ? 'bg-red-100 text-red-800' :
-            dataset.category === 'Federal Register' ? 'bg-green-100 text-green-800' :
-            'bg-gray-100 text-gray-800'
-          }`}>
+          <span className={`inline-block px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-800`}>
             {dataset.category}
           </span>
         </div>
@@ -44,14 +41,22 @@ function DatasetCard({ dataset, onSelect }: DatasetCardProps) {
 }
 
 interface GovDatasetBrowserProps {
-  onDatasetSelect?: (dataset: typeof govApiEndpoints[0]) => void;
+  onDatasetSelect?: (dataset: GovApiEndpoint) => void;
 }
 
+interface DatasetData {
+    success: boolean;
+    data?: unknown;
+    error?: string;
+    dataset?: string;
+    timestamp: Date;
+  }
+
 export default function GovDatasetBrowser({ onDatasetSelect }: GovDatasetBrowserProps) {
-  const [datasets, setDatasets] = useState(govApiEndpoints);
+  const [datasets] = useState<GovApiEndpoint[]>(govApiEndpoints);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [loadingDataset, setLoadingDataset] = useState<string | null>(null);
-  const [datasetData, setDatasetData] = useState<any>(null);
+  const [datasetData, setDatasetData] = useState<DatasetData | null>(null);
 
   const categories = ['all', ...new Set(govApiEndpoints.map(d => d.category))];
 
@@ -59,19 +64,34 @@ export default function GovDatasetBrowser({ onDatasetSelect }: GovDatasetBrowser
     ? datasets
     : datasets.filter(d => d.category === selectedCategory);
 
-  const handleDatasetSelect = async (dataset: typeof govApiEndpoints[0]) => {
+  const handleDatasetSelect = async (dataset: GovApiEndpoint) => {
     if (onDatasetSelect) {
       onDatasetSelect(dataset);
     }
-    
-    // Load dataset data
+
     setLoadingDataset(dataset.name);
+    setDatasetData(null); // Clear previous data
+
     try {
-      const response = await fetch(`/api/gov/dataset?name=${encodeURIComponent(dataset.name)}`);
+      // Extract params from the example URL
+      const url = new URL(dataset.example, 'http://dummybase.com'); // Base URL is required for parsing
+      const paramsStr = url.searchParams.get('params') || '{}';
+      const params = JSON.parse(paramsStr);
+      
+      const response = await fetch(`/api/gov?action=endpoint&endpoint=${dataset.id}&params=${encodeURIComponent(JSON.stringify(params))}`);
+      
       const data = await response.json();
-      setDatasetData(data);
-    } catch (error) {
+
+      if (!response.ok) {
+          throw new Error(data.error || 'Failed to load dataset');
+      }
+
+      setDatasetData({ ...data, dataset: dataset.name, timestamp: new Date() });
+
+    } catch (error: unknown) {
       console.error('Failed to load dataset:', error);
+      const message = error instanceof Error ? error.message : 'An unknown error occurred';
+      setDatasetData({ success: false, error: message, dataset: dataset.name, timestamp: new Date() });
     } finally {
       setLoadingDataset(null);
     }
@@ -102,7 +122,7 @@ export default function GovDatasetBrowser({ onDatasetSelect }: GovDatasetBrowser
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {filteredDatasets.map((dataset) => (
             <DatasetCard
-              key={dataset.name}
+              key={dataset.id}
               dataset={dataset}
               onSelect={handleDatasetSelect}
             />
@@ -118,14 +138,14 @@ export default function GovDatasetBrowser({ onDatasetSelect }: GovDatasetBrowser
           {loadingDataset ? (
             <div className="text-center py-8">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-              <p className="mt-2 text-sm text-gray-600">Loading dataset...</p>
+              <p className="mt-2 text-sm text-gray-600">Loading {loadingDataset}...</p>
             </div>
           ) : datasetData ? (
             <div className="space-y-4">
               <div>
                 <h4 className="font-medium text-gray-900">{datasetData.dataset}</h4>
                 <p className="text-sm text-gray-600">
-                  Loaded: {new Date(datasetData.timestamp).toLocaleTimeString()}
+                  Loaded at: {new Date(datasetData.timestamp).toLocaleTimeString()}
                 </p>
               </div>
               
@@ -144,7 +164,7 @@ export default function GovDatasetBrowser({ onDatasetSelect }: GovDatasetBrowser
             </div>
           ) : (
             <div className="text-center py-8 text-gray-500">
-              <p>Select a dataset to preview data</p>
+              <p>Select a dataset to preview its data</p>
             </div>
           )}
         </div>

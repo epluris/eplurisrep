@@ -3,15 +3,24 @@
 
 import { useState } from 'react';
 
+export interface SearchResult {
+    title: string;
+    link: string;
+    snippet: string;
+    source: string; // e.g., 'google', 'bing'
+  }
+
 interface SearchBoxProps {
-  onSearch?: (results: any[]) => void;
+  onSearch?: (results: SearchResult[]) => void;
   placeholder?: string;
 }
+
+type SearchEngine = 'google' | 'bing' | 'serper' | 'all';
 
 export default function SearchBox({ onSearch, placeholder = "Search the web..." }: SearchBoxProps) {
   const [query, setQuery] = useState('');
   const [loading, setLoading] = useState(false);
-  const [engine, setEngine] = useState<'google' | 'bing' | 'serper' | 'all'>('google');
+  const [engine, setEngine] = useState<SearchEngine>('google');
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -76,7 +85,7 @@ export default function SearchBox({ onSearch, placeholder = "Search the web..." 
               name="engine"
               value="google"
               checked={engine === 'google'}
-              onChange={(e) => setEngine(e.target.value as any)}
+              onChange={(e) => setEngine(e.target.value as SearchEngine)}
               className="text-blue-600"
             />
             <span>Google</span>
@@ -88,7 +97,7 @@ export default function SearchBox({ onSearch, placeholder = "Search the web..." 
               name="engine"
               value="bing"
               checked={engine === 'bing'}
-              onChange={(e) => setEngine(e.target.value as any)}
+              onChange={(e) => setEngine(e.target.value as SearchEngine)}
               className="text-blue-600"
             />
             <span>Bing</span>
@@ -100,7 +109,7 @@ export default function SearchBox({ onSearch, placeholder = "Search the web..." 
               name="engine"
               value="serper"
               checked={engine === 'serper'}
-              onChange={(e) => setEngine(e.target.value as any)}
+              onChange={(e) => setEngine(e.target.value as SearchEngine)}
               className="text-blue-600"
             />
             <span>Serper</span>
@@ -112,7 +121,7 @@ export default function SearchBox({ onSearch, placeholder = "Search the web..." 
               name="engine"
               value="all"
               checked={engine === 'all'}
-              onChange={(e) => setEngine(e.target.value as any)}
+              onChange={(e) => setEngine(e.target.value as SearchEngine)}
               className="text-blue-600"
             />
             <span>All Engines</span>

@@ -10,7 +10,7 @@ export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
     const query = searchParams.get('q');
-    const engine = searchParams.get('engine') as any;
+    const engine = searchParams.get('engine');
     const numResults = parseInt(searchParams.get('num') || '10');
     const allEngines = searchParams.get('all') === 'true';
 
@@ -36,22 +36,26 @@ export async function GET(request: NextRequest) {
       });
     }
 
+    const resultsArray = Array.isArray(results) ? results : [results];
+
     return NextResponse.json({
       query,
       engine: allEngines ? 'all' : engine,
-      count: results.length,
-      results,
+      count: resultsArray.length,
+      results: resultsArray,
       timestamp: new Date().toISOString(),
     });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Search API error:', error);
+    const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+    const stack = process.env.NODE_ENV === 'development' && error instanceof Error ? error.stack : undefined;
     
     return NextResponse.json(
       { 
         error: 'Search failed', 
-        message: error.message,
-        details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+        message: errorMessage,
+        details: stack
       },
       { status: 500 }
     );

@@ -1,64 +1,64 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useAuth } from '../components/AuthProvider';
 import LoginModal from '../components/LoginModal';
 import VaultDocumentCard from '../components/VaultDocumentCard';
 import AddToVaultModal from '../components/AddToVaultModal';
-import { getVaultDocuments, deleteVaultDocument, getVaultStats, VaultDocument } from '@/lib/firebase/vaultService';
-import { FaPlus, FaSearch, FaFilter, FaChartBar, FaSync } from 'react-icons/fa';
+import { getVaultDocuments, deleteVaultDocument, getVaultStats, VaultDocument, VaultStats } from '@/lib/firebase/vaultService';
+import { FaPlus, FaSearch, FaFilter, FaSync } from 'react-icons/fa';
 
 export const dynamic = 'force-dynamic';
 
-// Rest of your vault page code...
 export default function VaultPage() {
   const { user, loading: authLoading } = useAuth();
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
   const [documents, setDocuments] = useState<VaultDocument[]>([]);
   const [filteredDocs, setFilteredDocs] = useState<VaultDocument[]>([]);
-  const [stats, setStats] = useState<any>(null);
+  const [stats, setStats] = useState<VaultStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedSource, setSelectedSource] = useState<string>('all');
 
-  // Load vault documents
-  const loadVault = async () => {
+  const loadVault = useCallback(async () => {
     if (!user) return;
     
     setLoading(true);
     try {
-      // Load documents
-      const docsResult = await getVaultDocuments(user.uid);
+      const [docsResult, statsResult] = await Promise.all([
+        getVaultDocuments(user.uid),
+        getVaultStats(user.uid)
+      ]);
+
       if (docsResult.success) {
         setDocuments(docsResult.documents);
         setFilteredDocs(docsResult.documents);
+      } else {
+        console.error('Error loading documents:', docsResult.error);
       }
 
-      // Load stats
-      const statsResult = await getVaultStats(user.uid);
       if (statsResult.success) {
         setStats(statsResult.stats);
+      } else {
+        console.error('Error loading stats:', statsResult.error);
       }
     } catch (error) {
       console.error('Error loading vault:', error);
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
 
-  // Initial load
   useEffect(() => {
     if (user) {
       loadVault();
     }
-  }, [user]);
+  }, [user, loadVault]);
 
-  // Filter documents when search or filter changes
   useEffect(() => {
     let filtered = documents;
     
-    // Apply search
     if (searchTerm) {
       const term = searchTerm.toLowerCase();
       filtered = filtered.filter(doc => 
@@ -69,7 +69,6 @@ export default function VaultPage() {
       );
     }
     
-    // Apply source filter
     if (selectedSource !== 'all') {
       filtered = filtered.filter(doc => doc.source === selectedSource);
     }
@@ -86,8 +85,7 @@ export default function VaultPage() {
     }
   };
 
-  const handleEdit = (document: VaultDocument) => {
-    // We'll implement edit functionality next
+  const handleEdit = () => {
     alert('Edit functionality coming soon!');
   };
 
@@ -187,10 +185,10 @@ export default function VaultPage() {
                 <div className="text-sm text-purple-600">Sources</div>
               </div>
               <div className="text-center">
-                <div className="text-3xl font-bold text-yellow-400">
-                  {new Date(stats.lastUpdated).toLocaleDateString()}
-                </div>
-                <div className="text-sm text-yellow-600">Last Updated</div>
+                  <div className="text-3xl font-bold text-yellow-400">
+                    {new Date(stats.lastUpdated).toLocaleDateString()}
+                  </div>
+                  <div className="text-sm text-yellow-600">Last Updated</div>
               </div>
             </div>
           </div>
@@ -289,6 +287,7 @@ export default function VaultPage() {
       <AddToVaultModal
         isOpen={showAddModal}
         onClose={() => setShowAddModal(false)}
+        onDocumentAdded={loadVault}
       />
     </div>
   );

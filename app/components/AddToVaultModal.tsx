@@ -8,6 +8,7 @@ import { FaTimes, FaTag, FaSave, FaExternalLinkAlt } from 'react-icons/fa';
 interface AddToVaultModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onDocumentAdded?: () => void;
   documentData?: {
     title: string;
     description: string;
@@ -18,7 +19,9 @@ interface AddToVaultModalProps {
   };
 }
 
-export default function AddToVaultModal({ isOpen, onClose, documentData }: AddToVaultModalProps) {
+type SourceType = 'data.gov' | 'archives.gov' | 'congress.gov' | 'state' | 'other';
+
+export default function AddToVaultModal({ isOpen, onClose, onDocumentAdded, documentData }: AddToVaultModalProps) {
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -27,7 +30,7 @@ export default function AddToVaultModal({ isOpen, onClose, documentData }: AddTo
   // Form state
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [source, setSource] = useState<'data.gov' | 'archives.gov' | 'congress.gov' | 'state' | 'other'>('data.gov');
+  const [source, setSource] = useState<SourceType>('data.gov');
   const [sourceUrl, setSourceUrl] = useState('');
   const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState('');
@@ -87,6 +90,9 @@ export default function AddToVaultModal({ isOpen, onClose, documentData }: AddTo
 
       if (result.success) {
         setSuccess(true);
+        if (onDocumentAdded) {
+          onDocumentAdded();
+        }
         setTimeout(() => {
           onClose();
           setSuccess(false);
@@ -166,7 +172,7 @@ export default function AddToVaultModal({ isOpen, onClose, documentData }: AddTo
                 <label className="mb-2 block text-sm font-medium text-green-300">Source</label>
                 <select
                   value={source}
-                  onChange={(e) => setSource(e.target.value as any)}
+                  onChange={(e) => setSource(e.target.value as SourceType)}
                   className="w-full rounded-lg border border-green-800 bg-black p-3 text-green-400"
                 >
                   <option value="data.gov">Data.gov</option>

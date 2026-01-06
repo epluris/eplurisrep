@@ -2,22 +2,15 @@
 'use client';
 
 import { useState } from 'react';
-import GovSearchBox from '@/app/components/GovSearchBox';
+import GovSearchBox, { SearchResult } from '@/app/components/GovSearchBox';
 import GovDatasetBrowser from '@/app/components/GovDatasetBrowser';
-
-interface SearchResult {
-  source: string;
-  endpoint: string;
-  data: any;
-  metadata: any;
-}
 
 export default function GovernmentPage() {
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [searchError, setSearchError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'search' | 'datasets'>('search');
 
-  const handleSearchResults = (results: any[]) => {
+  const handleSearchResults = (results: SearchResult[]) => {
     setSearchResults(results);
     setSearchError(null);
   };
@@ -83,39 +76,30 @@ export default function GovernmentPage() {
             {searchResults.length > 0 && (
               <div className="space-y-6">
                 <h2 className="text-xl font-semibold text-gray-900">
-                  Search Results ({searchResults.length} sources)
+                  Search Results
                 </h2>
                 
                 {searchResults.map((result, index) => (
                   <div key={index} className="bg-white p-6 rounded-lg shadow-sm border">
                     <div className="flex items-center justify-between mb-4">
                       <div>
-                        <span className="font-medium text-gray-900">{result.metadata.source}</span>
-                        <span className="ml-2 px-2 py-1 text-xs bg-gray-100 text-gray-600 rounded">
-                          {result.metadata.endpoint}
-                        </span>
+                        <span className="font-medium text-gray-900">{result.source}</span>
                       </div>
-                      <span className="text-sm text-gray-500">
-                        {result.metadata.responseTime}ms
-                      </span>
                     </div>
                     
-                    {/* Display data based on source */}
-                    {result.data && (
-                      <div className="mt-4">
-                        {Array.isArray(result.data) ? (
-                          <div className="space-y-3">
-                            {result.data.slice(0, 3).map((item: any, i: number) => (
-                              <div key={i} className="p-3 bg-gray-50 rounded border">
+                    <div className="mt-4">
+                        <div className="space-y-3">
+                          
+                              <div className="p-3 bg-gray-50 rounded border">
                                 <h4 className="font-medium text-gray-900">
-                                  {item.title || item.name || 'Untitled'}
+                                  {result.title || 'Untitled'}
                                 </h4>
                                 <p className="text-sm text-gray-600 mt-1">
-                                  {item.description || item.snippet || 'No description'}
+                                  {result.description || 'No description'}
                                 </p>
-                                {item.url && (
+                                {result.url && (
                                   <a
-                                    href={item.url}
+                                    href={result.url}
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="text-sm text-blue-600 hover:underline mt-2 inline-block"
@@ -124,20 +108,8 @@ export default function GovernmentPage() {
                                   </a>
                                 )}
                               </div>
-                            ))}
-                            {result.data.length > 3 && (
-                              <p className="text-sm text-gray-500">
-                                ... and {result.data.length - 3} more results
-                              </p>
-                            )}
-                          </div>
-                        ) : (
-                          <pre className="text-sm bg-gray-50 p-3 rounded border overflow-x-auto">
-                            {JSON.stringify(result.data, null, 2)}
-                          </pre>
-                        )}
-                      </div>
-                    )}
+                        </div>
+                    </div>
                   </div>
                 ))}
               </div>

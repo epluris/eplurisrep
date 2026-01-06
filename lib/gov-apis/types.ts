@@ -1,6 +1,7 @@
 
 // lib/gov-apis/types.ts
 export interface GovApiEndpoint {
+  id: string;
   name: string;
   category: string;
   endpoint: string;
@@ -8,4 +9,7 @@ export interface GovApiEndpoint {
   requiresKey: boolean;
   searchKeywords: string[];
   example: string;
+  method?: 'GET' | 'POST';
+  apiKeyName?: string;
+  apiKeyLocation?: 'query' | 'header';
 }

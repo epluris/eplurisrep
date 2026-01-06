@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword, AuthError } from 'firebase/auth';
 import { auth } from '@/lib/firebase/config';
 
 interface LoginModalProps {
@@ -30,29 +30,36 @@ export default function LoginModal({ isOpen, onClose, mode }: LoginModalProps) {
         await createUserWithEmailAndPassword(auth, email, password);
       }
       onClose();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Authentication error:', err);
-      switch (err.code) {
-        case 'auth/email-already-in-use':
-          setError('This email is already registered. Try logging in instead.');
-          break;
-        case 'auth/invalid-email':
-          setError('Invalid email address.');
-          break;
-        case 'auth/operation-not-allowed':
-          setError('Email/password accounts are not enabled. Check Firebase console.');
-          break;
-        case 'auth/weak-password':
-          setError('Password is too weak. Use at least 6 characters.');
-          break;
-        case 'auth/user-not-found':
-          setError('No account found with this email.');
-          break;
-        case 'auth/wrong-password':
-          setError('Incorrect password.');
-          break;
-        default:
-          setError(err.message || 'Authentication failed. Check console for details.');
+      if (err instanceof Object && 'code' in err) {
+        const authError = err as AuthError;
+        switch (authError.code) {
+          case 'auth/email-already-in-use':
+            setError('This email is already registered. Try logging in instead.');
+            break;
+          case 'auth/invalid-email':
+            setError('Invalid email address.');
+            break;
+          case 'auth/operation-not-allowed':
+            setError('Email/password accounts are not enabled. Check Firebase console.');
+            break;
+          case 'auth/weak-password':
+            setError('Password is too weak. Use at least 6 characters.');
+            break;
+          case 'auth/user-not-found':
+            setError('No account found with this email.');
+            break;
+          case 'auth/wrong-password':
+            setError('Incorrect password.');
+            break;
+          default:
+            setError(authError.message || 'Authentication failed. Check console for details.');
+        }
+      } else if (err instanceof Error) {
+        setError(err.message || 'Authentication failed. Check console for details.');
+      } else {
+        setError('An unknown authentication error occurred.');
       }
     } finally {
       setLoading(false);

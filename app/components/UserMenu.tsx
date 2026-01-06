@@ -1,19 +1,18 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { FaUser, FaSignOutAlt, FaCaretDown } from 'react-icons/fa';
+
+const getInitialUser = (): string | null => {
+  if (typeof window === 'undefined') {
+    return null;
+  }
+  return localStorage.getItem('epluris_user');
+};
 
 export default function UserMenu() {
   const [showDropdown, setShowDropdown] = useState(false);
-  const [user, setUser] = useState<string | null>(null);
-
-  useEffect(() => {
-    // Check localStorage for user
-    const savedUser = localStorage.getItem('epluris_user');
-    if (savedUser) {
-      setUser(savedUser);
-    }
-  }, []);
+  const [user, setUser] = useState<string | null>(getInitialUser);
 
   const handleLogin = () => {
     const email = prompt('Enter email (local test):', 'test@example.com');

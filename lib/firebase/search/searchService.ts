@@ -19,6 +19,45 @@ export interface SearchParams {
   language?: string;
 }
 
+interface GoogleSearchItem {
+    title: string;
+    link: string;
+    snippet: string;
+    pagemap?: {
+      cse_image?: [{ src: string }];
+      cse_thumbnail?: [{ src: string }];
+    };
+    displayLink?: string;
+  }
+  
+  interface BingSearchItem {
+    name: string;
+    url: string;
+    snippet: string;
+    thumbnailUrl?: string;
+    displayUrl?: string;
+  }
+  
+  interface SerperSearchItem {
+    title: string;
+    link: string;
+    snippet: string;
+  }
+  
+  interface AlgoliaSearchItem {
+    objectID: string;
+    title?: string;
+    name?: string;
+    url?: string;
+    link?: string;
+    description?: string;
+    _highlightResult?: {
+      content?: {
+        value: string;
+      };
+    };
+  }
+
 export class SearchService {
   /**
    * Search using a specific engine
@@ -79,7 +118,7 @@ export class SearchService {
 
     const data = await response.json();
     
-    return data.items?.map((item: any, index: number) => ({
+    return data.items?.map((item: GoogleSearchItem, index: number) => ({
       id: `google_${index}_${Date.now()}`,
       title: item.title,
       link: item.link,
@@ -112,7 +151,7 @@ export class SearchService {
 
     const data = await response.json();
     
-    return data.webPages?.value?.map((item: any, index: number) => ({
+    return data.webPages?.value?.map((item: BingSearchItem, index: number) => ({
       id: `bing_${index}_${Date.now()}`,
       title: item.name,
       link: item.url,
@@ -151,7 +190,7 @@ export class SearchService {
 
     const data = await response.json();
     
-    return data.organic?.map((item: any, index: number) => ({
+    return data.organic?.map((item: SerperSearchItem, index: number) => ({
       id: `serper_${index}_${Date.now()}`,
       title: item.title,
       link: item.link,
@@ -193,7 +232,7 @@ export class SearchService {
 
     const data = await response.json();
     
-    return data.hits?.map((item: any, index: number) => ({
+    return data.hits?.map((item: AlgoliaSearchItem, index: number) => ({
       id: `algolia_${item.objectID || index}`,
       title: item.title || item.name || '',
       link: item.url || item.link || '',
