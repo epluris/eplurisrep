@@ -1,4 +1,5 @@
 import { govApiEndpoints } from './config';
+import { GovApiEndpoint, SearchResult } from './types';
 
 class GovApiService {
   async getDataset(datasetId: string, params: Record<string, unknown>) {
@@ -61,22 +62,42 @@ class GovApiService {
 
     try {
       const data = await response.json();
-      return {
-        success: true,
-        dataset: endpoint.name,
-        data,
-      };
+      return this.transformResults(data, endpoint);
     } catch {
       throw new Error(`Failed to parse JSON response from ${endpoint.name}`);
     }
   }
 
-  async search(query: string, sources: string[]) {
-    console.log('Searching:', query, sources);
-    return {
-      success: true,
-      data: [],
-    };
+  async search(query: string, sources: string[]): Promise<SearchResult[]> {
+    let endpointsToSearch = govApiEndpoints;
+    if (sources && sources.length > 0) {
+        endpointsToSearch = govApiEndpoints.filter(ep => 
+            sources.some(s => ep.searchKeywords.includes(s) || ep.id.includes(s))
+        );
+    }
+
+    const searchPromises = endpointsToSearch.map(endpoint => 
+      this.getDataset(endpoint.id, { q: query }).catch(error => {
+        console.error(`Error searching ${endpoint.name}:`, error);
+        return []; // Return empty array on error to not fail the whole search
+      })
+    );
+
+    const results = await Promise.all(searchPromises);
+    return results.flat();
+  }
+
+  private transformResults(data: any, endpoint: GovApiEndpoint): SearchResult[] {
+    // This is a flexible transformer. You may need to add more specific transformers for new endpoints.
+    const items = data.results || data.data || (Array.isArray(data) ? data : []);
+    if (!Array.isArray(items)) return [];
+
+    return items.map((item: any) => ({
+        title: item.title || item.name || item.fullName || 'No title',
+        link: item.url || item.website || (item.id ? `${endpoint.endpoint}/${item.id}` : endpoint.endpoint),
+        snippet: item.description || item.summary || item.details || 'No snippet available',
+        source: endpoint.name,
+    }));
   }
 
   getEndpoints() {

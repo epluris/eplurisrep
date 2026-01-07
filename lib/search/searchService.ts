@@ -2,10 +2,14 @@
 import { SearchProvider } from './config';
 import googleProvider from './providers/google';
 import bingProvider from './providers/bing';
+import { govApiService } from '@/lib/gov-apis';
 
 const searchProviders: { [key: string]: SearchProvider } = {
   google: googleProvider,
   bing: bingProvider,
+  gov: {
+    search: (query: string) => govApiService.search(query, [])
+  }
 };
 
 class SearchService {
@@ -20,7 +24,10 @@ class SearchService {
   async searchAll({ query, numResults }: { query: string; numResults: number }) {
     const allResults = await Promise.all(
       Object.values(searchProviders).map(provider => 
-        provider.search(query, { numResults })
+        provider.search(query, { numResults }).catch(error => {
+          console.error('Search provider failed:', error);
+          return []; // Return empty array on failure
+        })
       )
     );
     return allResults.flat();
