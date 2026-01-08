@@ -8,15 +8,23 @@ interface LoginModalProps {
   isOpen: boolean;
   onClose: () => void;
   mode: 'login' | 'register';
+  onModeSwitch: (mode: 'login' | 'register') => void;
 }
 
-export default function LoginModal({ isOpen, onClose, mode }: LoginModalProps) {
+export default function LoginModal({ isOpen, onClose, mode, onModeSwitch }: LoginModalProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
   if (!isOpen) return null;
+
+  const handleFormSwitch = (newMode: 'login' | 'register') => {
+    setError('');
+    setEmail('');
+    setPassword('');
+    onModeSwitch(newMode);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -130,9 +138,9 @@ export default function LoginModal({ isOpen, onClose, mode }: LoginModalProps) {
 
           <p className="text-center text-sm text-green-600">
             {mode === 'login' ? (
-              <>New user? <button type="button" onClick={() => {/* Switch to register mode */}} className="text-green-400 hover:underline">Register here</button></>
+              <>New user? <button type="button" onClick={() => handleFormSwitch('register')} className="text-green-400 hover:underline">Register here</button></>
             ) : (
-              <>Already have an account? <button type="button" onClick={() => {/* Switch to login mode */}} className="text-green-400 hover:underline">Login here</button></>
+              <>Already have an account? <button type="button" onClick={() => handleFormSwitch('login')} className="text-green-400 hover:underline">Login here</button></>
             )}
           </p>
         </form>

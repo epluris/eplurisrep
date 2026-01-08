@@ -10,6 +10,7 @@ export const runtime = 'edge';
 // Validate config on startup
 validateSearchConfig();
 
+// When you need user accounts:
 const supabase = createClient(
   process.env.SUPABASE_URL!,
   process.env.SUPABASE_ANON_KEY!
@@ -31,37 +32,62 @@ export async function GET(request: NextRequest) {
     }
 
     let results;
-    let sources: string[];
+    let sources: string[] = [];
 
     if (allEngines) {
-      results = await searchService.searchAll({ query, numResults });
-      sources = ['google', 'bing', 'gov'];
+      // Fetch from all sources in parallel
+      sources = ['congress', 'govinfo', 'federal']; // Example sources
+      const promises = sources.map(source =>
+        searchService.search({ query, engine: source, numResults }).catch(() => [])
+      );
+      const promiseResults = await Promise.all(promises);
+      results = promiseResults.flat();
     } else {
       const source = engine || 'google';
+      sources = [source];
       results = await searchService.search({
         query,
         engine: source,
         numResults,
       });
-      sources = [source];
     }
 
+    /*
+    // Alternative fetch strategy: Primary with fallbacks
+    const primary = 'congress';
+    const fallbacks = ['govinfo', 'federal'];
+    let fallbackResults = [];
+    sources = [primary, ...fallbacks];
+    for (const source of sources) {
+        try {
+            fallbackResults = await searchService.search({query, engine: source, numResults});
+            if (fallbackResults.length > 0) break;
+        } catch (error) {
+            continue;
+        }
+    }
+    results = fallbackResults;
+    */
+
+    const resultsArray = Array.isArray(results) ? results : [results];
+
+    // Store user search history
     // TODO: get userId from session/auth
-    const userId = 'user-placeholder'; 
+    const userId = 'user-placeholder';
     if (userId) {
         await supabase.from('search_history').insert({
           user_id: userId,
           query,
           sources,
-          results_count: results.length,
+          results_count: resultsArray.length,
         });
     }
 
     const response = NextResponse.json({
       query,
       engine: allEngines ? 'all' : (engine || 'google'),
-      count: results.length,
-      results,
+      count: resultsArray.length,
+      results: resultsArray,
       timestamp: new Date().toISOString(),
     });
 
@@ -69,6 +95,35 @@ export async function GET(request: NextRequest) {
     response.headers.set('Cache-Control', 'public, s-maxage=300');
     
     return response;
+
+    /*
+    // Alternative: Return partial results immediately via streaming
+    const encoder = new TextEncoder();
+    const stream = new ReadableStream({
+      async start(controller) {
+        // Send first source results immediately
+        const congressResults = await searchService.search({query, engine: 'congress', numResults});
+        controller.enqueue(encoder.encode(JSON.stringify({
+          type: 'partial',
+          source: 'congress',
+          results: congressResults
+        })));
+        
+        // Send other sources as they come
+        const otherSources = ['govinfo', 'federal'];
+        const promises = otherSources.map(source => searchService.search({query, engine: source, numResults}));
+        const otherResults = await Promise.all(promises);
+        
+        controller.enqueue(encoder.encode(JSON.stringify({
+          type: 'complete',
+          results: otherResults.flat()
+        })));
+        
+        controller.close();
+      }
+    });
+    return new Response(stream, { headers: { 'Content-Type': 'application/json' } });
+    */
 
   } catch (error: any) {
     console.error('Search API error:', error);

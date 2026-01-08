@@ -13,3 +13,9 @@ export interface GovApiEndpoint {
   apiKeyName?: string;
   apiKeyLocation?: 'query' | 'header';
 }
+
+export interface SearchResult {
+  title: string;
+  url: string;
+  snippet: string;
+}

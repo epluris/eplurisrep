@@ -13,6 +13,7 @@ export const dynamic = 'force-dynamic';
 export default function VaultPage() {
   const { user, loading: authLoading } = useAuth();
   const [showLoginModal, setShowLoginModal] = useState(false);
+  const [modalMode, setModalMode] = useState<'login' | 'register'>('login');
   const [showAddModal, setShowAddModal] = useState(false);
   const [documents, setDocuments] = useState<VaultDocument[]>([]);
   const [filteredDocs, setFilteredDocs] = useState<VaultDocument[]>([]);
@@ -93,6 +94,11 @@ export default function VaultPage() {
     const sources = documents.map(doc => doc.source);
     return ['all', ...Array.from(new Set(sources))];
   };
+  
+  const handleLoginClick = () => {
+    setModalMode('login');
+    setShowLoginModal(true);
+  };
 
   if (authLoading) {
     return (
@@ -128,7 +134,7 @@ export default function VaultPage() {
               </p>
               <div className="flex justify-center gap-4">
                 <button
-                  onClick={() => setShowLoginModal(true)}
+                  onClick={handleLoginClick}
                   className="rounded-lg border border-green-800 bg-green-900 px-6 py-3 text-green-300 hover:bg-green-800"
                 >
                   LOGIN TO CONTINUE
@@ -140,7 +146,8 @@ export default function VaultPage() {
         <LoginModal 
           isOpen={showLoginModal}
           onClose={() => setShowLoginModal(false)}
-          mode="login"
+          mode={modalMode}
+          onModeSwitch={setModalMode}
         />
       </div>
     );
@@ -281,7 +288,8 @@ export default function VaultPage() {
       <LoginModal 
         isOpen={showLoginModal}
         onClose={() => setShowLoginModal(false)}
-        mode="login"
+        mode={modalMode}
+        onModeSwitch={setModalMode}
       />
       
       <AddToVaultModal

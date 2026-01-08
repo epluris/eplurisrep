@@ -1,4 +1,3 @@
-
 import { SearchProvider } from './config';
 import googleProvider from './providers/google';
 import bingProvider from './providers/bing';
@@ -8,7 +7,22 @@ const searchProviders: { [key: string]: SearchProvider } = {
   google: googleProvider,
   bing: bingProvider,
   gov: {
-    search: (query: string) => govApiService.search(query, [])
+    name: 'gov',
+    fullName: 'Government APIs',
+    website: 'https://www.usa.gov/developer',
+    supportsHistorical: false,
+    search: async (query: string) => {
+      const results = await govApiService.search(query, []);
+      return {
+        success: true,
+        results: results.map(result => ({
+          title: result.title,
+          url: result.url,
+          description: result.snippet, // Map snippet to description
+          raw: result, // Optionally, pass the original result
+        })),
+      };
+    },
   }
 };
 

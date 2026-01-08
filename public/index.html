@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Government Docs Search - Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; }
+        input { width: 70%; padding: 10px; font-size: 16px; }
+        button { padding: 10px 20px; font-size: 16px; }
+        .result { border: 1px solid #ddd; padding: 15px; margin: 10px 0; }
+        .source { color: #666; font-size: 0.9em; }
+        .error { color: red; }
+    </style>
+</head>
+<body>
+    <h1>Government Documents Search</h1>
+    <input type="text" id="searchInput" placeholder="Search for documents...">
+    <button onclick="search()">Search</button>
+    <div id="results"></div>
+
+    <script>
+        async function search() {
+            const query = document.getElementById('searchInput').value;
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '<p>Searching...</p>';
+            
+            try {
+                const response = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
+                const data = await response.json();
+                
+                if (data.error) {
+                    resultsDiv.innerHTML = `<p class="error">${data.error}</p>`;
+                    return;
+                }
+                
+                let html = `<h3>Found ${data.total} results</h3>`;
+                
+                if (data.results && data.results.length > 0) {
+                    data.results.forEach(result => {
+                        html += `
+                        <div class="result">
+                            <h4><a href="${result.url}" target="_blank">${result.title || 'Untitled'}</a></h4>
+                            <p>${result.description || 'No description available'}</p>
+                            <div class="source">
+                                Source: ${result.source} | 
+                                Type: ${result.type} |
+                                Date: ${result.date || 'Unknown'}
+                            </div>
+                        </div>`;
+                    });
+                } else {
+                    html += '<p>No results found.</p>';
+                }
+                
+                resultsDiv.innerHTML = html;
+            } catch (error) {
+                resultsDiv.innerHTML = `<p class="error">Search failed: ${error.message}</p>`;
+            }
+        }
+        
+        // Allow pressing Enter to search
+        document.getElementById('searchInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') search();
+        });
+    </script>
+</body>
+</html>
+

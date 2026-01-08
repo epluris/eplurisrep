@@ -1,0 +1,23 @@
+{
+  "name": "government-docs-search",
+  "version": "1.0.0",
+  "scripts": {
+    "start": "node src/app.js",
+    "dev": "nodemon src/app.js",
+    "deploy:functions": "firebase deploy --only functions",
+    "deploy:hosting": "firebase deploy --only hosting"
+  },
+  "dependencies": {
+    "express": "^4.18.0",
+    "cors": "^2.8.5",
+    "axios": "^1.6.0",
+    "dotenv": "^16.3.0",
+    "@google-cloud/firestore": "^7.0.0",
+    "@google-cloud/secret-manager": "^4.0.0",
+    "firebase-admin": "^11.0.0",
+    "firebase-functions": "^4.0.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.0"
+  }
+}
